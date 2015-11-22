@@ -4,9 +4,21 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+const fs = require('fs');
+
+// Does out article.json exist?  If not, create a rudimentary version
+try {
+    fs.lstatSync('./articles/articleJson.json');
+} catch (e) {
+    //Rudimentary, but if the file doesn't exist we get an error
+    //Write a file. We want synchronous as part of start-up
+    fs.writeFileSync('./articles/articleJson.json', '[]', 'utf8');
+}
+
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var admin = require('./routes/admin');
 
 var app = express();
 
@@ -24,6 +36,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
+app.use('/admin', admin);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

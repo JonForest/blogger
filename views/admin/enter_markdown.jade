@@ -1,0 +1,13 @@
+extends admin_layout
+
+block content
+
+  form#blogForm(action='/admin/blog')
+    textarea#blogContent
+    input#blogId(type='hidden', value=blogId)
+    input#publish(type='hidden', value=0)
+    button#save Save
+    button#saveAndPublish Save and Publish
+
+block footer
+  script(src='/javascripts/admin.js')
