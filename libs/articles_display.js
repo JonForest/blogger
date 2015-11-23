@@ -4,6 +4,11 @@ const fs = require('fs');
 const async = require('async');
 const marked = require('marked');
 
+/**
+ * Methods for retrieving whole single articles and information about all articles
+ *
+ * @type {{getArticlesArray, getArticle}}
+ */
 module.exports = (function () {
     const path = './articles/';
 
@@ -23,17 +28,16 @@ module.exports = (function () {
             (files, next) => {
                 let articles = [];
                 async.each(files, (file, nextFile) => {
-                    let date = file.substr(0, 10);
-                    let slug = file.split('.')[0];
+                    let date = file.substr(0, 10),
+                        slug = file.split('.')[0];
+
                     fs.readFile(path + '/' + file, 'utf8', (err, contents) => {
                         if (err) {
                             throw err;
                             return;
                         }
 
-                        articles.push(
-                            Object.assign({date:date, slug:slug}, processContents(contents))
-                        );
+                        articles.push(Object.assign({date: date, slug:slug}, processContents(contents)));
                         nextFile();
                     });
                 }, function(err) {
@@ -53,7 +57,7 @@ module.exports = (function () {
 
             // Sort the articles
             (articles, next) => {
-                let sortedArticles = articles.sort(function(a, b) {
+                let sortedArticles = articles.sort((a, b) => {
                     if (a.date === b.date) {
                         return 0;
                     }
@@ -122,7 +126,7 @@ module.exports = (function () {
                 case 'title':
                     // Hey, we've found the title.  Trim off any whitespace and assign to our title var
                     let trimmedTitle = chunks[1].trim(); // Remove whitespace
-                    title = trimmedTitle.trim().substr(1, trimmedTitle.length - 2); //Remove "
+                    title = trimmedTitle.substr(1, trimmedTitle.length - 2); //Remove "
                     break;
                 case 'tags':
                     //We've found our tags

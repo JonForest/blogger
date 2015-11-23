@@ -4,7 +4,6 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-const fs = require('fs');
 
 // Does out article.json exist?  If not, create a rudimentary version
 // NOTE: This is for my first iteration, left in for reference and discussion
