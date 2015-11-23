@@ -13,7 +13,7 @@ describe('Articles', function() {
 
         fs.mkdirSync(filePath);
 
-        articles = require('../libs/articles.js')(filePath, testJsonName);
+        articles = require('../libs/articles_admin.js')(filePath, testJsonName);
     });
 
     it('can add a new article', function(done) {
@@ -23,42 +23,115 @@ describe('Articles', function() {
             markDown: "This is some **markdown**",
             title: 'Test Post'
         }, function (err, articleId) {
-            console.log(err);
             (err === null).should.equal(true);
-            try {
-                let content = fs.readFileSync(filePath + articleId + '.md', 'utf8');
-                content.should.containEql('**markdown**');
-            } catch(e) {
-                //FAIL
-                console.log(e);
-                (false).should.equal(true);
-            }
+            let content = fs.readFileSync(filePath + articleId + '.md', 'utf8');
+            content.should.containEql('**markdown**');
+            done();
+        })
+    });
+
+    it('new article can be edited', function(done) {
+        // Prepare the test
+        fs.writeFileSync(testJson, '[{"date":"2015-11-22T08:15:54.984Z","title":"Test Post"}]', 'utf8');
+
+        articles.save({
+            articleId: 0,
+            markDown: 'No, this is markdown',
+            title: 'Article Title'
+        }, function(err, articleId) {
+            (err === null).should.equal(true);
+
+            //Regular file exists
+            let content = fs.readFileSync(filePath + '0.md', 'utf8');
+            content.should.containEql('No, this is');
+            done();
+        });
+
+    });
+
+    it('article can be published', function(done) {
+        //Prepare the test
+        fs.writeFileSync(testJson, '[]', 'utf8');
+
+        articles.saveAndPublish({
+            articleId: null,
+            markDown: "This is some **markdown**",
+            title: 'Test Post'
+        }, function (err, articleId) {
+            (err === null).should.equal(true);
+            let content = fs.readFileSync(filePath + articleId + '.md', 'utf8');
+            content.should.containEql('**markdown**');
+
+             // publish file exists
+            let publishContent = fs.readFileSync(filePath + '0_publish.md', 'utf8');
+            publishContent.should.containEql('**markdown**');
             done();
 
         })
     });
 
-    it('new article can be edited', function() {
-        // Prepare the test
-        fs.writeFileSync(testJson, '[{"date":"2015-11-22T08:15:54.984Z","title":"Test Post"}]', 'utf8');
-        articles.update({
-            articleId: 1,
-            content: 'No, this is markdown',
+    it('published article can be updated, with changes not appearing on published article', function(done) {
+        // Set-up test
+        fs.writeFileSync(testJson, '[{"date":"2015-11-22T08:15:54.984Z","title":"Test Post","Published": true}]', 'utf8');
+        fs.writeFileSync(filePath + '0.md', 'This is some **markdown**');
+        fs.writeFileSync(filePath + '0_publish.md', 'This is some **markdown**');
+
+
+        articles.save({
+            articleId: 0,
+            markDown: 'No, this is markdown',
             title: 'Article Title'
-        })
+        }, function(err, articleId) {
+            (err === null).should.equal(true);
+
+            //Regular file exists
+            let content = fs.readFileSync(filePath + '0.md', 'utf8');
+            content.should.containEql('No, this is');
+
+            let publishContent = fs.readFileSync(filePath + '0_publish.md', 'utf8');
+            publishContent.should.containEql('**markdown**');
+
+            done();
+        });
     });
 
-    it('saved article is immediately published');
+    it('articles can be deleted - all files', function(done) {
+        // Set-up test
+        fs.writeFileSync(testJson, '[{"date":"2015-11-22T08:15:54.984Z","title":"Test Post","Published": true}]', 'utf8');
+        fs.writeFileSync(filePath + '0.md', 'This is some **markdown**');
+        fs.writeFileSync(filePath + '0_publish.md', 'This is some **markdown**');
 
-    it('article can be published');
+        articles.delete(0, function(err) {
+            (err === null).should.equal(true);
+            try {
+                fs.lstatSync(filePath + '0.md');
+            } catch (err) {
+                err.message.should.containEql('no such file');
+            }
+            try {
+                fs.lstatSync(filePath + '0_publish.md');
+            } catch (err) {
+                err.message.should.containEql('no such file');
+            }
+            done();
+        });
+    });
 
-    it('published article can be updated, with changes not appearing on published article');
+    it('articles can be deleted - no published files', function(done) {
+        // Set-up test
+        fs.writeFileSync(testJson, '[{"date":"2015-11-22T08:15:54.984Z","title":"Test Post","Published": true}]', 'utf8');
+        fs.writeFileSync(filePath + '0.md', 'This is some **markdown**');
 
-    it('changes to published article are only visible when "re-publish" is selected');
-
-
-    it('articles can be deleted');
-
+        articles.delete(0, function(err) {
+            (err === null).should.equal(true);
+            try {
+                fs.lstatSync(filePath + '0_publish.md');
+            } catch (err) {
+                err.message.should.containEql('no such file');
+            }
+            done();
+        });
+    });
 
     afterEach(function() {
         //Tidy up the files in the test dir

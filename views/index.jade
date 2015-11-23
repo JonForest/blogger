@@ -1,5 +1,25 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  h1 Techy Blog
+
+  each article in articles
+    a(href='/article/' + article.slug)
+      h2=article.title
+    br
+    span=article.date
+    span  *&nbsp;
+    span
+     each tag in article.tags
+       a(href='/tag/' + tag)
+        =tag
+       span &nbsp;
+    br
+    br
+
+  if tag
+    a(href='/') Show all Tags
+
+
+
+

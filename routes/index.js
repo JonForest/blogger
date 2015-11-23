@@ -1,9 +1,28 @@
-var express = require('express');
-var router = express.Router();
+/* global require, module */
+'use strict';
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+const articles = require('../libs/articles_display');
+var express = require('express');
+const router = express.Router();
+
+/** GET List of articles. */
+router.get('/', displayList);
+router.get('/tag/:tag', displayList);
+function displayList(req, res) {
+    let tag = req.params.tag;
+    articles.getArticlesArray(tag, function(articles) {
+        res.render('index', {
+            articles: articles,
+            tag: tag
+        });
+    });
+}
+
+/** Display an article **/
+router.get('/article/:slug', function(req, res) {
+    articles.getArticle(req.params.slug, function(article) {
+        res.render('article', {article: article});
+    });
 });
 
 module.exports = router;

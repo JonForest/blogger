@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const articleJson = require('../articles/articleJson.json');
 
 /* GET home page. */
 router.get('/', function(req, res) {

@@ -7,13 +7,14 @@ var bodyParser = require('body-parser');
 const fs = require('fs');
 
 // Does out article.json exist?  If not, create a rudimentary version
-try {
-    fs.lstatSync('./articles/articleJson.json');
-} catch (e) {
-    //Rudimentary, but if the file doesn't exist we get an error
-    //Write a file. We want synchronous as part of start-up
-    fs.writeFileSync('./articles/articleJson.json', '[]', 'utf8');
-}
+// NOTE: This is for my first iteration, left in for reference and discussion
+//try {
+//    fs.lstatSync('./articles/articleJson.json');
+//} catch (e) {
+//    //Rudimentary, but if the file doesn't exist we get an error
+//    //Write a file. We want synchronous as part of start-up
+//    fs.writeFileSync('./articles/articleJson.json', '[]', 'utf8');
+//}
 
 
 var routes = require('./routes/index');
